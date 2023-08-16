@@ -55,3 +55,11 @@ func CheckMissingFiles(listOfFiles []string) []string {
 	}
 	return missingFiles
 }
+
+func CopyFile(dest string, source string) error {
+	templateFile, err := os.ReadFile(source)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(dest, templateFile, 0770)
+}
