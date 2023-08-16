@@ -20,9 +20,27 @@
 package governance
 
 import (
+	"fmt"
+	"github.com/eclipse-tractusx/tractusx-quality-checks/internal/filesystem"
+	"path"
 	"testing"
 )
 
 func TestShouldPassIfFileContainsCopyrightHeader(t *testing.T) {
+	listOfFilesWithCopyrightHeader := []string{"test1.java",
+		"test2.py",
+		"test3.yaml",
+	}
 
+	dir := t.TempDir()
+	for _, file := range listOfFilesWithCopyrightHeader {
+		err := filesystem.CopyFile(path.Join(dir, file), path.Join("test", file))
+		if err != nil {
+			t.Errorf(fmt.Sprintf("Unable to copy test file %v: %v", file, err))
+		}
+	}
+	result := NewCopyrightHeaderCheck(dir).Test()
+	if !result.Passed {
+		t.Errorf("Test should pass, test files contain copyright headers.")
+	}
 }
