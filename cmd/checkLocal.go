@@ -29,6 +29,7 @@ import (
 	"github.com/eclipse-tractusx/tractusx-quality-checks/pkg/docs"
 	"github.com/eclipse-tractusx/tractusx-quality-checks/pkg/helm"
 	"github.com/eclipse-tractusx/tractusx-quality-checks/pkg/repo"
+	"github.com/eclipse-tractusx/tractusx-quality-checks/pkg/governance"
 	"github.com/eclipse-tractusx/tractusx-quality-checks/pkg/tractusx"
 	"github.com/spf13/cobra"
 )
@@ -43,6 +44,7 @@ var releaseGuidelines = []tractusx.QualityGuideline{
 	repo.NewRepoStructureExists("./"),
 	helm.NewHelmStructureExists("./"),
 	helm.NewResourceMgmt("./"),
+	governance.NewCopyrightHeaderCheck("./"),
 }
 
 // checkLocalCmd represents the checkLocal command

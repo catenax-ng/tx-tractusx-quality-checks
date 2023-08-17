@@ -19,7 +19,15 @@
 
 package governance
 
-import "github.com/eclipse-tractusx/tractusx-quality-checks/pkg/tractusx"
+import (
+	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/eclipse-tractusx/tractusx-quality-checks/pkg/tractusx"
+)
 
 type CopyrightHeaderCheck struct {
 	baseDir string
@@ -29,22 +37,63 @@ func NewCopyrightHeaderCheck(baseDir string) tractusx.QualityGuideline {
 	return &CopyrightHeaderCheck{baseDir}
 }
 
-func (r *CopyrightHeaderCheck) Name() string {
+func (c *CopyrightHeaderCheck) Name() string {
 	return "TRG 7.02 - License and Copyright header"
 }
 
-func (r *CopyrightHeaderCheck) Description() string {
+func (c *CopyrightHeaderCheck) Description() string {
 	return "Where possible, all source code should contain appropriate copyright and license notices as well as information on each contribution. "
 }
 
-func (r *CopyrightHeaderCheck) ExternalDescription() string {
+func (c *CopyrightHeaderCheck) ExternalDescription() string {
 	return "https://eclipse-tractusx.github.io/docs/release/trg-7/trg-7-02"
 }
 
-func (r *CopyrightHeaderCheck) IsOptional() bool {
+func (c *CopyrightHeaderCheck) IsOptional() bool {
 	return false
 }
 
-func (r *CopyrightHeaderCheck) Test() *tractusx.QualityResult {
+func (c *CopyrightHeaderCheck) Test() *tractusx.QualityResult {
+	var filesNoHeader []string
+	err := filepath.Walk(c.baseDir, func(path string, info fs.FileInfo, err error) error {
+		if !info.IsDir() && isAcceptedFileType(info.Name()) {
+			if !hasValidCopywrightHeader(path) {
+				filesNoHeader = append(filesNoHeader, path)
+			}
+		}
+		return nil
+	})
 
+	if err != nil {
+		return &tractusx.QualityResult{ErrorDescription: fmt.Sprintf("Can't files from %q: %v", c.baseDir, err)}
+	}
+	if len(filesNoHeader) > 0 {
+		return &tractusx.QualityResult{ErrorDescription: fmt.Sprintf("Can't find copyright headers at:\n\t%s", strings.Join(filesNoHeader, "\n\t"))}
+	}
+	return &tractusx.QualityResult{Passed: true}
+}
+
+func isAcceptedFileType(filename string) bool {
+	var validTypes = []string{".java", ".json", ".py", ".yaml", ".yml", "Dockerfile", ".js", ".sh", ".xml", ".sql", ".ts", ".cs", ".tsx", ".kt"}
+	for _, v := range validTypes {
+		if strings.Contains(filename, v) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasValidCopywrightHeader(filepath string) bool {
+	copyrightHeaderPart1 := "Apache-2.0"
+	copyrightHeaderPart2 := "Contributors to the Eclipse Foundation"
+
+	content, err := os.ReadFile(filepath)
+	if err != nil {
+		return false
+	}
+	s := string(content)
+	if strings.Contains(s, copyrightHeaderPart1) && strings.Contains(s, copyrightHeaderPart2) {
+		return true
+	}
+	return false
 }
