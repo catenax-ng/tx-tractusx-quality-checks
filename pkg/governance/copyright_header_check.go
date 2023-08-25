@@ -74,13 +74,13 @@ func (c *CopyrightHeaderCheck) Test() *tractusx.QualityResult {
 }
 
 func isAcceptedFileType(filename string) bool {
-	var validTypes = []string{".java", ".json", ".py", ".yaml", ".yml", "Dockerfile", ".js", ".sh", ".xml", ".sql", ".ts", ".cs", ".tsx", ".kt"}
+	var validTypes = []string{".java", ".py", ".yaml", ".yml", ".js", ".sh", ".xml", ".sql", ".ts", ".cs", ".tsx", ".kt", ".tractusx", ".css", ".scss"}
 	for _, v := range validTypes {
-		if strings.Contains(filename, v) {
+		if strings.HasSuffix(filename, v) {
 			return true
 		}
 	}
-	return false
+	return strings.Contains(filename, "Dockerfile")
 }
 
 func hasValidCopywrightHeader(filepath string) bool {

@@ -147,7 +147,7 @@ func renderChart(chartPath string) (map[string]string, string) {
 
 	renderedChart, err := engine.Render(loadedChart, finalValues)
 	if err != nil {
-		return nil, fmt.Sprintf("\n\tUnable to render helm chart %s.", chartPath)
+		return nil, fmt.Sprintf("\n\tUnable to render helm chart %s: %v.", chartPath, err)
 	}
 	return renderedChart, ""
 }
